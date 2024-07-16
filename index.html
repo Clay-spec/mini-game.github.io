@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aim Training Game</title>
+    <style>
+        /* General body styles */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container styles */
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Heading styles */
+        h2 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Form styles */
+        form {
+            display: flex;
+            flex-direction: column;
+            position: relative; /* Ensure relative positioning for animation */
+        }
+
+        label {
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+
+        /* Input field container */
+        .input-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background-color: #333;
+            color: #eee;
+            width: 100%;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease, transform 0.5s ease; /* Transition for opacity and transform */
+        }
+
+        /* Animation for fading out and sliding */
+        .fade-out-move-right {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        /* Submit button styles */
+        input[type="submit"] {
+            background-color: #1E90FF;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            /* Neon glow effect */
+            box-shadow: 0 0 10px rgba(30, 144, 255, 0); /* Initial state */
+            transition: box-shadow 0.3s ease; /* Transition for box-shadow */
+            display: inline-block; /* Ensure button dimensions are respected */
+        }
+
+        input[type="submit"]:hover,
+        input[type="submit"]:focus {
+            background-color: #4169E1;
+            /* Neon glow effect on hover or focus */
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.8);
+        }
+
+        /* Game styles */
+        #gameArea {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-color: #222;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        .target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #1E90FF;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #000; /* Black stroke around the circle */
+        }
+
+        .target:hover {
+            background-color: #4169E1;
+        }
+
+        /* Scoreboard styles */
+        #scoreboard {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Enter Your Custom Username</h2>
+        <form id="usernameForm">
+            <label for="username">Username:</label>
+            <div class="input-container">
+                <input type="text" id="username" name="username" placeholder="Enter your username" required class="">
+                <span class="typing-animation"></span>
+            </div>
+            <input type="submit" value="Submit" onclick="startGame(event)">
+        </form>
+        <div id="gameArea"></div>
+        <div id="scoreboard">Score: 0</div>
+    </div>
+
+    <script>
+        // Global variables
+        var currentUser = ''; // Stores the current username
+        var score = 0; // Variable to store the player's score
+        var gameArea = document.getElementById('gameArea');
+        var scoreboard = document.getElementById('scoreboard');
+        var gameTime = 10; // Game duration in seconds
+
+        function startGame(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get username value
+            currentUser = document.getElementById('username').value;
+
+            // Validate username
+            if (currentUser.trim() === '') {
+                alert('Please enter a username.');
+                return;
+            }
+
+            console.log('Username entered: ' + currentUser);
+
+            // Clear input field and hide the form
+            document.getElementById('username').value = '';
+            document.getElementById('usernameForm').style.display = 'none';
+
+            // Show game area and scoreboard
+            gameArea.style.display = 'block';
+            scoreboard.style.display = 'block';
+
+            // Start the game
+            score = 0;
+            updateScore();
+            startGameTimer();
+            createTarget();
+        }
+
+        function startGameTimer() {
+            console.log('Game timer started');
+            setTimeout(() => {
+                endGame();
+            }, gameTime * 1000);
+        }
+
+        function createTarget() {
+            if (document.getElementsByClassName('target').length > 0) return;
+
+            console.log('Creating a new target');
+            var target = document.createElement('div');
+            target.className = 'target';
+            target.style.top = Math.random() * (gameArea.clientHeight - 50) + 'px';
+            target.style.left = Math.random() * (gameArea.clientWidth - 50) + 'px';
+
+            target.addEventListener('click', () => {
+                score++;
+                updateScore();
+                console.log('Target clicked, score: ' + score);
+                target.remove();
+                createTarget();
+            });
+
+            gameArea.appendChild(target);
+        }
+
+        function updateScore() {
+            scoreboard.innerText = `Score: ${score}`;
+        }
+
+        function endGame() {
+            console.log('Game ended');
+            // Hide game area
+            gameArea.style.display = 'none';
+            alert(`Game over! ${currentUser}'s score: ${score}`);
+
+            // Send results to Discord webhook
+            var payload = {
+                content: `Game over! ${currentUser}'s score: ${score}`
+            };
+
+            fetch('https://discord.com/api/webhooks/1262648666985074760/FHLEJXKrdp0Rr9YJhTj0digdsXx45vuhQAduaAv2jkTxXp7fdV9ug6VF_csw98YGR3h2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => {
+                console.log(response); // Log the response for debugging
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                alert('Score submitted successfully!');
+                resetGame();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit score. Please try again later.');
+            });
+        }
+
+        function resetGame() {
+            console.log('Resetting game');
+            document.getElementById('usernameForm').style.display = 'block';
+            gameArea.innerHTML = '';
+            score = 0;
+            updateScore();
+        }
+    </script>
+</body>
+</html>
